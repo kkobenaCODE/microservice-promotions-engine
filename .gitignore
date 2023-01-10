@@ -15,8 +15,6 @@
 ###< symfony/phpunit-bridge ###
 
 ###> phpunit/phpunit ###
-/phpunit.xml
-.phpunit.result.cache
 ###< phpunit/phpunit ###
 
 
@@ -191,5 +189,6 @@ fabric.properties
 ### Symfony Patch ###
 /web/css/
 /web/js/
+mysql
 
 # End of https://www.toptal.com/developers/gitignore/api/phpstorm,symfony
