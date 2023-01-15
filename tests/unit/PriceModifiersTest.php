@@ -5,6 +5,7 @@ namespace App\Tests\unit;
 use App\DTO\LowestPriceEnquiry;
 use App\Entity\Promotion;
 use App\Filter\Modifier\DateRangeMultiplier;
+use App\Filter\Modifier\EvenItemsMultiplier;
 use App\Filter\Modifier\FixedPriceVoucher;
 use App\Tests\ServiceTestCase;
 
@@ -52,5 +53,45 @@ class PriceModifiersTest extends ServiceTestCase
 
         //Then
         $this->assertEquals(500, $modifiedPrice);
+    }
+    /** @test */
+    public function EvenItemsMultiplier_returns_a_correctly_modified_price(): void
+    {
+        //Given
+        $enquiry = new LowestPriceEnquiry();
+        $enquiry->setQuantity(5);
+
+        $promotion = new Promotion();
+        $promotion->setName('Buy one get one free');
+        $promotion->setAdjustment(0.5);
+        $promotion->setCriteria(["minimum_quantity" => 2]);
+        $promotion->setType('even_items_multiplier');
+
+        $fixedPriceVoucher = new EvenItemsMultiplier();
+        //When
+        $modifiedPrice = $fixedPriceVoucher->modify(100, 5, $promotion, $enquiry);
+
+        //Then
+        $this->assertEquals(300, $modifiedPrice);
+    }
+    /** @test */
+    public function EvenItemsMultiplier_correctly_calculates_alternatives(): void
+    {
+        //Given
+        $enquiry = new LowestPriceEnquiry();
+        $enquiry->setQuantity(5);
+
+        $promotion = new Promotion();
+        $promotion->setName('Buy one get one free');
+        $promotion->setAdjustment(0.75);
+        $promotion->setCriteria(["minimum_quantity" => 2]);
+        $promotion->setType('even_items_multiplier');
+
+        $fixedPriceVoucher = new EvenItemsMultiplier();
+        //When
+        $modifiedPrice = $fixedPriceVoucher->modify(100, 5, $promotion, $enquiry);
+
+        //Then
+        $this->assertEquals(400, $modifiedPrice);
     }
 }

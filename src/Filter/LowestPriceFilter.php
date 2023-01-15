@@ -2,31 +2,37 @@
 
 namespace App\Filter;
 
-use App\DTO\PromotionEnquiryInterface;
+use App\DTO\PriceEnquiryInterface;
 use App\Entity\Promotion;
+use App\Filter\Modifier\Factory\PriceModifierFactoryInterface;
 
-class LowestPriceFilter implements PromotionsFilterInterface
+class LowestPriceFilter implements PriceFilterInterface
 {
+    public function __construct(private PriceModifierFactoryInterface $priceModifierFactory)
+    {
+    }
 
-    public function apply(PromotionEnquiryInterface $enquiry, Promotion ...$promotion): PromotionEnquiryInterface
+    public function apply(PriceEnquiryInterface $enquiry, Promotion ...$promotions): PriceEnquiryInterface
     {
         $price = $enquiry->getProduct()->getPrice();
+        $enquiry->setPrice($price);
         $quantity = $enquiry->getQuantity();
         $lowestPrice = $quantity * $price;
-    //loop over promotions
-         // run the promotions' modification logic against the enquiry
-        // 1. check does the promotion apply
-        // 2. apply the price modification to obtain a $modifiedProce (how?)
-//        $modifiedPrice = $priceModified->modify($price, $quantity, $promotion, $enquiry);
-        // 3. check if modifiedPrice < lowestPrice
-         // 1. save enquiry properties
-         // 2. update lowestPrice
 
+        foreach ($promotions as $promotion) {
 
-        $enquiry->setDiscountedPrice(250);
-        $enquiry->setPrice(100);
-        $enquiry->setPromotionId(3);
-        $enquiry->setPromotionName('Black Friday half price sale');
+            $priceModified = $this->priceModifierFactory->create($promotion->getType());
+
+            $modifiedPrice = $priceModified->modify($price, $quantity, $promotion, $enquiry);
+
+            if ($modifiedPrice < $lowestPrice) {
+                $enquiry->setDiscountedPrice($modifiedPrice);
+                $enquiry->setPromotionId($promotion->getId());
+                $enquiry->setPromotionName($promotion->getName());
+
+                $lowestPrice = $modifiedPrice;
+            }
+        }
 
         return $enquiry;
     }
