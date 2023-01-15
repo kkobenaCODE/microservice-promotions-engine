@@ -6,6 +6,7 @@ use App\Entity\Product;
 use App\Entity\Promotion;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Contracts\Cache\CacheInterface;
 
 /**
  * @extends ServiceEntityRepository<Promotion>
